@@ -20,5 +20,33 @@ html
         input#message.form-control(type='text')
         button.btn.btn-primary(type='submit') 전송
       #box.box
+    script.
+      var socket = io(); 
+	  
+      $('#chat').on('submit', function(e){   // 전송 버튼을 누를 때 - 1
+        socket.emit('send message', $('#name').val(), $('#message').val());
+        $('#message').val('');// 내용을 삭제함
+        $('#message').focus();//커서를 이곳이 위치시킴
+        e.preventDefault();
+      });
+	  
+      socket.on('create name', function(name){   // 이름 셋팅 - 2
+      $('#name').val(name);
+      });
 
-      
+      socket.on('change name', function(oldname, name){   // 닉네임을 바꿨을 때 - 3
+        $('#chatLog').append('<알림> ' + oldname + '님이 ' + name +'님으로 닉네임을 변경했습니다.\n');
+      });
+	  
+      socket.on('receive message', function(msg){   // 메세지를 받았을 때 - 4
+        $('#chatLog').append(msg+'\n');
+        $('#chatLog').scrollTop($('#chatLog')[0].scrollHeight);
+      });
+
+      socket.on('new_disconnect', function(name){  // 채팅방 접속이 끊어졌을 때 - 5
+        $('#chatLog').append('<알림> ' + name + '님이 채팅창을 떠났습니다.\n');
+      });
+    
+      socket.on('new_connect', function(name){  // 채팅방에 접속했을 때 - 6
+        $('#chatLog').append('<알림> ' + name + '님이 채팅창에 접속했습니다.\n');
+      });
